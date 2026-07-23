@@ -5,10 +5,13 @@ export default function BlogCard({ post, featured = false }) {
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className={`card-lift group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:border-white/30 ${
+      className={`card-lift group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:border-white/30 ${
         featured ? "md:grid md:grid-cols-2" : ""
       }`}
     >
+      {/* subtle glow that fades in on hover */}
+      <span className="pointer-events-none absolute inset-0 z-10 opacity-0 transition-opacity duration-500 group-hover:opacity-100 [background:radial-gradient(340px_180px_at_50%_0%,rgba(255,255,255,0.07),transparent_70%)]" />
+
       <div className={`relative overflow-hidden border-b border-white/10 ${featured ? "md:border-b-0 md:border-r" : ""}`}>
         <img
           src={post.cover}
