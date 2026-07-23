@@ -161,3 +161,109 @@ body {
 .group:hover .card-shot {
   transform: translateY(calc(-100% + 300px));
 }
+
+/* ===== global ambient + micro-animations (added site-wide) ===== */
+
+/* slowly drifting background orbs */
+@keyframes drift-a {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(50px, -40px) scale(1.12); }
+  66% { transform: translate(-40px, 30px) scale(0.94); }
+}
+@keyframes drift-b {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-60px, 40px) scale(1.15); }
+}
+.animate-drift-a { animation: drift-a 24s ease-in-out infinite; }
+.animate-drift-b { animation: drift-b 30s ease-in-out infinite; }
+
+/* shimmering accent line used by section kickers */
+@keyframes shimmer-line {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer-line {
+  background: linear-gradient(
+    90deg,
+    rgba(250, 250, 250, 0.15),
+    rgba(250, 250, 250, 0.95),
+    rgba(250, 250, 250, 0.15)
+  );
+  background-size: 200% 100%;
+  animation: shimmer-line 3.2s linear infinite;
+}
+
+/* gentle rise-in for elements that don't use framer-motion */
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise-in { animation: rise-in 0.7s cubic-bezier(0.21, 0.47, 0.32, 0.98) both; }
+
+/* soft pulsing ring (e.g. around avatars / status dots) */
+@keyframes pulse-ring {
+  0% { transform: scale(0.85); opacity: 0.7; }
+  70% { transform: scale(1.5); opacity: 0; }
+  100% { opacity: 0; }
+}
+.pulse-ring { position: relative; }
+.pulse-ring::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  border: 1px solid rgba(250, 250, 250, 0.45);
+  animation: pulse-ring 2.4s ease-out infinite;
+  pointer-events: none;
+}
+
+/* animated gradient sheen for headings/badges */
+@keyframes sheen {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.text-sheen {
+  background: linear-gradient(
+    100deg,
+    #fafafa 0%,
+    #fafafa 40%,
+    #9ca3af 50%,
+    #fafafa 60%,
+    #fafafa 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: sheen 6s linear infinite;
+}
+
+/* animated underline that grows on hover (nav links, inline links) */
+.underline-grow {
+  position: relative;
+}
+.underline-grow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  height: 1px;
+  width: 100%;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s cubic-bezier(0.21, 0.47, 0.32, 0.98);
+}
+.underline-grow:hover::after {
+  transform: scaleX(1);
+}
+
+/* accessibility: honour users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

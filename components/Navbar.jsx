@@ -53,7 +53,7 @@ export default function Navbar() {
               <Link
                 href={l.href}
                 className={`relative text-sm uppercase tracking-widest transition-colors hover:text-white ${
-                  pathname === l.href ? "text-white" : "text-white/50"
+                  pathname === l.href ? "text-white" : "text-white/50 underline-grow"
                 }`}
               >
                 {l.label}
@@ -71,7 +71,7 @@ export default function Navbar() {
         <a
           href="/Shaheer-CV.pdf"
           download="Shaheer-Shaikh-CV.pdf"
-          className="hidden rounded-full border border-white/30 px-5 py-2 text-xs uppercase tracking-widest transition-all hover:bg-white hover:text-black md:block"
+          className="btn-shine hidden rounded-full border border-white/30 px-5 py-2 text-xs uppercase tracking-widest transition-all hover:bg-white hover:text-black md:block"
         >
           Hire Me
         </a>
