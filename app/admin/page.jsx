@@ -315,6 +315,12 @@ export default function AdminPage() {
   const [trackRange, setTrackRange] = useState("all");
   const [platFilter, setPlatFilter] = useState("All");
   const [subRange, setSubRange] = useState("all");
+  const [visitorPage, setVisitorPage] = useState(1);
+
+  // reset to the first page whenever the time filter changes
+  useEffect(() => {
+    setVisitorPage(1);
+  }, [trackRange]);
 
   const loadAll = () => {
     fetch("/api/projects", { cache: "no-store" }).then((r) => r.json()).then(setProjects).catch(() => {});
@@ -501,6 +507,31 @@ export default function AdminPage() {
 
   const allEvents = analytics?.events || [];
   const rangeEvents = cutoff ? allEvents.filter((ev) => new Date(ev.ts) >= cutoff) : allEvents;
+
+  /* ---- visitor log pagination (newest first, oldest last) ---- */
+  const VISITORS_PER_PAGE = 25;
+  const visitorTotalPages = Math.max(1, Math.ceil(rangeEvents.length / VISITORS_PER_PAGE));
+  const visitorCurPage = Math.min(Math.max(1, visitorPage), visitorTotalPages);
+  const pagedEvents = rangeEvents.slice(
+    (visitorCurPage - 1) * VISITORS_PER_PAGE,
+    visitorCurPage * VISITORS_PER_PAGE
+  );
+  // windowed page numbers, e.g. 1 … 4 5 [6] 7 8 … 20
+  const pageNumbers = (() => {
+    const total = visitorTotalPages;
+    const cur = visitorCurPage;
+    if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+    const set = new Set([1, 2, total - 1, total, cur - 1, cur, cur + 1]);
+    const nums = [...set].filter((n) => n >= 1 && n <= total).sort((a, b) => a - b);
+    const out = [];
+    let prev = 0;
+    for (const n of nums) {
+      if (n - prev > 1) out.push("…");
+      out.push(n);
+      prev = n;
+    }
+    return out;
+  })();
 
   // For "All Time" use full aggregate history; for a filtered range compute
   // from recent events (last 300 visits recorded).
@@ -743,13 +774,23 @@ export default function AdminPage() {
 
             {/* recent visitors */}
             <div className={card}>
-              <p className={cardTitle}>
-                <Icon name="clock" className="h-3.5 w-3.5" /> Recent visitors (kaun, kahan se, kis device se)
-              </p>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <p className={cardTitle}>
+                  <Icon name="clock" className="h-3.5 w-3.5" /> Recent visitors (kaun, kahan se, kis device se)
+                </p>
+                {rangeEvents.length > 0 && (
+                  <span className="text-[11px] uppercase tracking-widest text-white/40">
+                    {rangeEvents.length} total ·{" "}
+                    {(visitorCurPage - 1) * VISITORS_PER_PAGE + 1}–
+                    {Math.min(visitorCurPage * VISITORS_PER_PAGE, rangeEvents.length)} shown
+                  </span>
+                )}
+              </div>
               <div className="mt-4 overflow-x-auto">
                 <table className="w-full min-w-[600px] text-left text-sm">
                   <thead>
                     <tr className="border-b border-white/10 text-[11px] uppercase tracking-widest text-white/40">
+                      <th className="pb-2 pr-4">#</th>
                       <th className="pb-2 pr-4">Time</th>
                       <th className="pb-2 pr-4">Page</th>
                       <th className="pb-2 pr-4">Location</th>
@@ -758,8 +799,11 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {rangeEvents.slice(0, 30).map((ev, i) => (
+                    {pagedEvents.map((ev, i) => (
                       <tr key={i} className="border-b border-white/5 text-white/70">
+                        <td className="whitespace-nowrap py-2.5 pr-4 text-white/30">
+                          {(visitorCurPage - 1) * VISITORS_PER_PAGE + i + 1}
+                        </td>
                         <td className="whitespace-nowrap py-2.5 pr-4 text-white/50">{timeAgo(ev.ts)}</td>
                         <td className="py-2.5 pr-4">{ev.path}</td>
                         <td className="py-2.5 pr-4">{ev.city ? `${ev.city}, ` : ""}{ev.country}</td>
@@ -775,6 +819,45 @@ export default function AdminPage() {
                 </table>
                 {!rangeEvents.length && <p className="py-3 text-sm text-white/40">Is range me koi visitor record nahi.</p>}
               </div>
+
+              {/* pagination controls */}
+              {visitorTotalPages > 1 && (
+                <div className="mt-5 flex flex-wrap items-center justify-center gap-1.5">
+                  <button
+                    onClick={() => setVisitorPage(visitorCurPage - 1)}
+                    disabled={visitorCurPage === 1}
+                    className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-white/60 transition-colors hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                    aria-label="Previous page"
+                  >
+                    ‹ Prev
+                  </button>
+                  {pageNumbers.map((n, i) =>
+                    n === "…" ? (
+                      <span key={`e${i}`} className="px-2 text-white/30">…</span>
+                    ) : (
+                      <button
+                        key={n}
+                        onClick={() => setVisitorPage(n)}
+                        className={`min-w-[2.25rem] rounded-lg border px-3 py-1.5 text-sm transition-colors ${
+                          n === visitorCurPage
+                            ? "border-white bg-white text-black"
+                            : "border-white/10 text-white/60 hover:border-white/30 hover:text-white"
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    )
+                  )}
+                  <button
+                    onClick={() => setVisitorPage(visitorCurPage + 1)}
+                    disabled={visitorCurPage === visitorTotalPages}
+                    className="rounded-lg border border-white/10 px-3 py-1.5 text-sm text-white/60 transition-colors hover:border-white/30 hover:text-white disabled:cursor-not-allowed disabled:opacity-30"
+                    aria-label="Next page"
+                  >
+                    Next ›
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
