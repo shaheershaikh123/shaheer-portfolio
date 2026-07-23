@@ -7,6 +7,7 @@ import Cursor from "../components/Cursor";
 import ScrollProgress from "../components/ScrollProgress";
 import ChatWidget from "../components/ChatWidget";
 import AmbientBackground from "../components/AmbientBackground";
+import Grain from "../components/Grain";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -124,6 +125,7 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         <AmbientBackground />
+        <Grain />
         <Track />
         <Cursor />
         <ScrollProgress />

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Reveal from "./Reveal";
+import Tilt3D from "./Tilt3D";
 
 /* Stroke icons per service slug — monochrome, consistent weight */
 const ICONS = {
@@ -61,6 +62,7 @@ export default function ServicesGrid({ services = [] }) {
     <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
       {services.map((s, i) => (
         <Reveal key={s.slug} delay={i * 0.06} className="h-full">
+          <Tilt3D className="h-full" max={8}>
           <Link
             href={`/services#${s.slug}`}
             className="card-lift group relative flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-8 hover:border-white/35"
@@ -103,6 +105,7 @@ export default function ServicesGrid({ services = [] }) {
               <span className="ml-auto h-px w-0 bg-white/40 transition-all duration-500 group-hover:w-16" />
             </span>
           </Link>
+          </Tilt3D>
         </Reveal>
       ))}
     </div>

@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { useRef } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { profile } from "../lib/data";
 import Typewriter from "./Typewriter";
 import Counter from "./Counter";
+
+// WebGL centerpiece — client-only, loaded after the page so it never blocks render.
+const Hero3D = dynamic(() => import("./Hero3D"), { ssr: false });
 
 const container = {
   hidden: {},
@@ -78,6 +82,11 @@ export default function Hero() {
           backgroundSize: "60px 60px",
         }}
       />
+
+      {/* 3D WebGL centerpiece (desktop only, decorative) */}
+      <div className="pointer-events-none absolute right-[-6rem] top-1/2 hidden h-[640px] w-[640px] -translate-y-1/2 opacity-90 lg:block xl:right-0">
+        <Hero3D />
+      </div>
 
       {/* breathing glow orbs */}
       <div className="animate-breathe pointer-events-none absolute left-1/4 top-1/4 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-white/[0.05] blur-[110px]" />
